@@ -36,6 +36,8 @@ Students can use **either**:
 
 ### For Students
 
+**👉 See [TUTORIAL.md](./TUTORIAL.md) for complete step-by-step guide**
+
 1. Visit the deployed app URL
 2. Enter your **access keyword** OR your **own Gemini API key**
 3. Upload a video
@@ -70,34 +72,17 @@ Students can use **either**:
 
 4. **Open:** `http://localhost:5173`
 
-## 📦 Deployment to Render.com
+## 📦 Deployment
 
-1. **Build:**
-   ```bash
-   npm run build
-   ```
+This app can be deployed to platforms like Render.com, Heroku, or any Node.js hosting service.
 
-2. **Push to GitHub:**
-   ```bash
-   git add .
-   git commit -m "Deploy v3.0"
-   git push origin main
-   ```
+**Requirements:**
+- Node.js runtime
+- Environment variables: `GEMINI_API_KEY`, `ACCESS_KEYWORD`, `SESSION_SECRET`
+- Build command: `npm install && npm run build`
+- Start command: `npm run start`
 
-3. **Create Web Service on Render:**
-   - Build Command: `npm run build`
-   - Start Command: `npm start`
-
-4. **Set Environment Variables:**
-   ```
-   GEMINI_API_KEY=your_key
-   ACCESS_KEYWORD=your_keyword
-   SESSION_SECRET=generate_random_string
-   MAX_CONCURRENT_SESSIONS=12
-   NODE_ENV=production
-   ```
-
-   See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment guide.
+**For detailed deployment instructions, contact the repository maintainer.**
 
 ## 🔑 How Authentication Works
 

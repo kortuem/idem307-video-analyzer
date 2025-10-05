@@ -34,5 +34,6 @@ build/
 tmp/
 temp/
 
-# Internal development documentation (not for public repo)
+# Internal documentation (not for public repo)
+# Includes: setup guides, deployment docs, dev notes, analysis reports
 internal/
