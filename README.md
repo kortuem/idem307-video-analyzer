@@ -1,5 +1,11 @@
 # Video Analyzer AI v3.0
 
+**Developed by**: Prof. Gerd Kortuem with Claude Code
+**Institution**: TU Delft, Faculty of Industrial Design Engineering
+**Contact**: g.w.kortuem@tudelft.nl
+
+---
+
 AI-powered video frame analysis with **dual authentication** and **continuous narrative mode**.
 
 ## 🔒 Dual Authentication
@@ -271,11 +277,17 @@ Check server health and capacity.
 
 MIT License
 
-## 🙏 Credits
+## Credits
 
-- Built with Claude Code (AI pair programming)
+**Developed by**: Prof. Gerd Kortuem with Claude Code
+**Institution**: TU Delft, Faculty of Industrial Design Engineering
+**Course**: IDEM307 Generative AI and Design
+**Contact**: g.w.kortuem@tudelft.nl
+
+**Powered by**:
 - Google Gemini 2.5 Flash API
-- Original prototype: TU Delft IDEM307
+- React 19 + Vite + Tailwind CSS
+- Render.com (hosting)
 
 ---
 

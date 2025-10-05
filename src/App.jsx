@@ -28,6 +28,12 @@ export default function App() {
           <VideoNarrative />
           <DebugPanel />
         </div>
+
+        <footer className="mt-12 pt-6 border-t border-slate-800 text-center text-sm text-slate-400">
+          <p>Developed by Prof. Gerd Kortuem with Claude Code</p>
+          <p>TU Delft, Faculty of Industrial Design Engineering | g.w.kortuem@tudelft.nl</p>
+          <p>v3.0 | October 2025</p>
+        </footer>
       </div>
     </div>
   );

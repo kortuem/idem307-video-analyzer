@@ -1,5 +1,11 @@
 # Video Analyzer Tutorial
 
+**Developed by**: Prof. Gerd Kortuem with Claude Code
+**TU Delft, Faculty of Industrial Design Engineering** | g.w.kortuem@tudelft.nl
+**Version**: 3.0 | October 2025
+
+---
+
 **A step-by-step guide for students using the AI Video Analyzer**
 
 ---
@@ -235,7 +241,7 @@ L **Avoid:**
 
 ### Still Having Issues?
 
-1. **Check browser console** (F12 ’ Console tab) for errors
+1. **Check browser console** (F12 ï¿½ Console tab) for errors
 2. **Try a different browser** (Chrome, Firefox, Safari, Edge)
 3. **Contact your instructor** with:
    - What you were trying to do
@@ -255,14 +261,14 @@ This tool is continuously improving! Share your experience with your instructor:
 
 | Action | Steps |
 |--------|-------|
-| **Start Analysis** | Upload video ’ Choose perspective ’ Choose mode ’ Click "Analyze" |
-| **Change Perspective** | Select new perspective ’ Click "Analyze" (reuses frames) |
-| **Download Report** | After analysis completes ’ Click "Download Report" |
-| **Clear & Restart** | Click "Clear" in API key banner ’ Start fresh |
+| **Start Analysis** | Upload video ï¿½ Choose perspective ï¿½ Choose mode ï¿½ Click "Analyze" |
+| **Change Perspective** | Select new perspective ï¿½ Click "Analyze" (reuses frames) |
+| **Download Report** | After analysis completes ï¿½ Click "Download Report" |
+| **Clear & Restart** | Click "Clear" in API key banner ï¿½ Start fresh |
 | **Stop Analysis** | Click "Stop Analysis" during processing |
 
 ---
 
-**Happy Analyzing! <¥(**
+**Happy Analyzing! <ï¿½(**
 
 *Built with AI for educational video analysis | TU Delft IDEM307*
