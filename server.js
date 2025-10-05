@@ -102,7 +102,7 @@ app.post('/api/auth/validate', (req, res) => {
     // Keyword auth - create session
     req.session.authType = 'keyword';
     req.session.authenticated = true;
-    console.log(`[AUTH] Keyword auth successful - session created`);
+    console.log(`[AUTH] Keyword auth successful - session ID: ${req.sessionID}`);
 
     // Explicitly save session to ensure cookie is sent
     req.session.save((err) => {
@@ -114,6 +114,7 @@ app.post('/api/auth/validate', (req, res) => {
                 message: 'Failed to create session'
             });
         }
+        console.log(`[AUTH] Session saved successfully - ID: ${req.sessionID}`);
         res.json({
             success: true,
             auth_type: 'keyword',
@@ -126,8 +127,16 @@ app.post('/api/auth/validate', (req, res) => {
 app.post('/api/analyze', async (req, res) => {
     const { image_data, perspective_prompt } = req.body;
 
+    // Debug session state
+    console.log(`[ANALYZE] Session ID: ${req.sessionID}, Authenticated: ${req.session.authenticated}, AuthType: ${req.session.authType}`);
+
     // Check if authenticated via session
     if (!req.session.authenticated || req.session.authType !== 'keyword') {
+        console.log(`[ANALYZE] Auth check failed - Session data:`, {
+            sessionID: req.sessionID,
+            authenticated: req.session.authenticated,
+            authType: req.session.authType
+        });
         return res.status(401).json({
             success: false,
             error: 'not_authenticated',
