@@ -70,11 +70,23 @@ app.post('/api/auth/validate', (req, res) => {
         // Mark session as using own API key
         req.session.authType = 'api_key';
         req.session.authenticated = true;
-        return res.json({
-            success: true,
-            auth_type: 'api_key',
-            message: 'Using your own API key'
+        // Explicitly save session to ensure cookie is sent
+        req.session.save((err) => {
+            if (err) {
+                console.error('[AUTH] Session save error:', err);
+                return res.status(500).json({
+                    success: false,
+                    error: 'session_error',
+                    message: 'Failed to create session'
+                });
+            }
+            return res.json({
+                success: true,
+                auth_type: 'api_key',
+                message: 'Using your own API key'
+            });
         });
+        return;
     }
 
     // Otherwise, treat as keyword for backend proxy
@@ -92,10 +104,21 @@ app.post('/api/auth/validate', (req, res) => {
     req.session.authenticated = true;
     console.log(`[AUTH] Keyword auth successful - session created`);
 
-    res.json({
-        success: true,
-        auth_type: 'keyword',
-        message: 'Access granted via instructor key'
+    // Explicitly save session to ensure cookie is sent
+    req.session.save((err) => {
+        if (err) {
+            console.error('[AUTH] Session save error:', err);
+            return res.status(500).json({
+                success: false,
+                error: 'session_error',
+                message: 'Failed to create session'
+            });
+        }
+        res.json({
+            success: true,
+            auth_type: 'keyword',
+            message: 'Access granted via instructor key'
+        });
     });
 });
 
