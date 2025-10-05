@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: video-analyzer
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ACCESS_KEYWORD
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: MAX_CONCURRENT_SESSIONS
+        value: 12
