@@ -36,12 +36,12 @@ app.use(express.json({ limit: '50mb' }));
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Changed to true to ensure session is created
     cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // HTTPS only in production
         maxAge: SESSION_TIMEOUT_MINUTES * 60 * 1000,
-        sameSite: 'lax'
+        sameSite: 'strict' // Same origin, use strict
     }
 }));
 
