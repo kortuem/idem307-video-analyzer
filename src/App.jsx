@@ -32,7 +32,13 @@ export default function App() {
         <footer className="mt-12 pt-6 border-t border-slate-800 text-center text-sm text-slate-400">
           <p>Developed by Prof. Gerd Kortuem with Claude Code</p>
           <p>TU Delft, Faculty of Industrial Design Engineering | g.w.kortuem@tudelft.nl</p>
-          <p>v3.0 | October 2025</p>
+          <p>v3.0 | Deployed: {new Date(__BUILD_TIME__).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
         </footer>
       </div>
     </div>
