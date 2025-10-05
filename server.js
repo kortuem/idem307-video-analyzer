@@ -6,6 +6,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy - required for Render behind Cloudflare
+app.set('trust proxy', 1);
+
 // Configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ACCESS_KEYWORD = process.env.ACCESS_KEYWORD || 'demo123';
