@@ -10,7 +10,7 @@ cat .env
 Should show:
 ```
 GEMINI_API_KEY=AIzaSy...
-ACCESS_KEYWORD=idem307_2025
+ACCESS_KEYWORD=your_access_keyword
 SESSION_SECRET=change-this-to-random-string-in-production
 MAX_CONCURRENT_SESSIONS=12
 ```
@@ -45,7 +45,7 @@ http://localhost:5173
 ```
 
 ### 5. Test keyword auth
-1. Enter: `idem307_2025`
+1. Enter your access keyword (get from instructor)
 2. Click "Validate"
 3. Should see: ✓ Access granted via instructor key
 4. Upload a video (e.g., MP4 file)

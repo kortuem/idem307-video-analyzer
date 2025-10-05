@@ -217,7 +217,7 @@ Validate access keyword or detect API key. Sets HTTP-only cookie for session.
 **Request:**
 ```json
 {
-  "keyword": "idem307_2025"  // or "AIzaSy..."
+  "keyword": "your_access_keyword"  // or "AIzaSy..."
 }
 ```
 
