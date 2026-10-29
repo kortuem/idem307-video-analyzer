@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAppState, AnalysisStatus, AnalysisModes } from '../state/AppStateProvider.jsx';
+import { useAppState, AnalysisStatus, AnalysisModes } from '../state/appHooks.js';
 import { getPerspectiveById } from '../utils/perspectives.js';
 
 const changeStyles = {
@@ -25,7 +25,6 @@ export default function AnalysisResults() {
 
   const results = analysisResults[selectedPerspective] ?? [];
   const highlights = analysisHighlights[selectedPerspective] ?? [];
-  const highlightIndexes = new Set(highlights.map((item) => item.frameIndex));
   const highlightMap = new Map(highlights.map((item) => [item.frameIndex, item]));
 
   const hasResults = results.length > 0;

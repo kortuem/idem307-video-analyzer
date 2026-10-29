@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useAppState } from "../state/AppStateProvider.jsx";
+import { useAppState } from "../state/appHooks.js";
 import { useAnalysisServices } from "../hooks/useAnalysisServices.js";
 import { formatDuration, formatFileSize } from "../utils/formatters.js";
 

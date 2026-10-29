@@ -12,6 +12,22 @@ function isGeminiApiKey(input) {
   return trimmed.startsWith('AIzaSy') && trimmed.length === 39;
 }
 
+async function safeFetch(...args) {
+  try { return await fetch(...args); }
+  catch (error) {
+    if (error?.name === 'AbortError') throw new DOMException('Request cancelled', 'AbortError');
+    throw new Error('Request failed. Check your connection.');
+  }
+}
+
+async function safeJson(response) {
+  try { return await response.json(); }
+  catch (error) {
+    if (error?.name === 'AbortError') throw new DOMException('Request cancelled', 'AbortError');
+    throw new Error('Unable to read the response.');
+  }
+}
+
 export class GeminiClient {
   constructor({ apiKey = '', logger }) {
     this.apiKey = apiKey;
@@ -56,7 +72,7 @@ export class GeminiClient {
     if (this.authType === 'keyword') {
       this.logger?.log('Sending frame to backend proxy');
 
-      const response = await fetch('/api/analyze', {
+      const response = await safeFetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,15 +86,12 @@ export class GeminiClient {
       });
 
       if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        this.logger?.log('Backend proxy error', 'error', errorBody);
-        const message = errorBody.message ?? response.statusText;
-        throw new Error(`Proxy error: ${message}`);
+        throw new Error(`Proxy request failed (HTTP ${response.status}).`);
       }
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!data.success) {
-        throw new Error(data.message || 'Analysis failed');
+        throw new Error('Analysis failed');
       }
 
       return {
@@ -88,7 +101,7 @@ export class GeminiClient {
     }
 
     // Direct API call for own API key
-    const url = `${BASE_URL}/${this.model}:generateContent?key=${this.apiKey}`;
+    const url = `${BASE_URL}/${this.model}:generateContent`;
     const payload = {
       contents: [
         {
@@ -111,23 +124,21 @@ export class GeminiClient {
 
     this.logger?.log('Sending frame to Gemini API (direct)');
 
-    const response = await fetch(url, {
+    const response = await safeFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-goog-api-key': this.apiKey,
       },
       body: JSON.stringify(payload),
       signal: abortSignal,
     });
 
     if (!response.ok) {
-      const errorBody = await response.json().catch(() => ({}));
-      this.logger?.log('Gemini API responded with error', 'error', errorBody);
-      const message = errorBody.error?.message ?? response.statusText;
-      throw new Error(`Gemini API error: ${message}`);
+      throw new Error(`Gemini request failed (HTTP ${response.status}). Check key, quota and model access.`);
     }
 
-    const data = await response.json();
+    const data = await safeJson(response);
     const candidate = data.candidates?.[0];
     const text = candidate?.content?.parts
       ?.map((part) => part.text)
@@ -150,7 +161,7 @@ export class GeminiClient {
       // Use backend proxy for keyword auth
       this.logger?.log('Generating summary via backend proxy');
 
-      const response = await fetch('/api/generate-summary', {
+      const response = await safeFetch('/api/generate-summary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,15 +172,12 @@ export class GeminiClient {
       });
 
       if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        this.logger?.log('Backend proxy error', 'error', errorBody);
-        const message = errorBody.message ?? response.statusText;
-        throw new Error(`Proxy error: ${message}`);
+        throw new Error(`Proxy request failed (HTTP ${response.status}).`);
       }
 
-      const data = await response.json();
+      const data = await safeJson(response);
       if (!data.success) {
-        throw new Error(data.message || 'Summary generation failed');
+        throw new Error('Summary generation failed');
       }
 
       return {
@@ -179,7 +187,7 @@ export class GeminiClient {
     }
 
     // Direct API call for own API key
-    const url = `${BASE_URL}/${this.model}:generateContent?key=${this.apiKey}`;
+    const url = `${BASE_URL}/${this.model}:generateContent`;
     const payload = {
       contents: [
         {
@@ -194,23 +202,21 @@ export class GeminiClient {
 
     this.logger?.log('Generating summary via direct API');
 
-    const response = await fetch(url, {
+    const response = await safeFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-goog-api-key': this.apiKey,
       },
       body: JSON.stringify(payload),
       signal: abortSignal,
     });
 
     if (!response.ok) {
-      const errorBody = await response.json().catch(() => ({}));
-      this.logger?.log('Gemini summary error', 'error', errorBody);
-      const message = errorBody.error?.message ?? response.statusText;
-      throw new Error(`Gemini API error: ${message}`);
+      throw new Error(`Gemini request failed (HTTP ${response.status}). Check key, quota and model access.`);
     }
 
-    const data = await response.json();
+    const data = await safeJson(response);
     const candidate = data.candidates?.[0];
     const text = candidate?.content?.parts
       ?.map((part) => part.text)

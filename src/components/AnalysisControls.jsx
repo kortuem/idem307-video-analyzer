@@ -5,7 +5,7 @@ import {
   ActionTypes,
   AnalysisStatus,
   AnalysisModes,
-} from '../state/AppStateProvider.jsx';
+} from '../state/appHooks.js';
 import { perspectiveList } from '../utils/perspectives.js';
 import { useAnalysisServices } from '../hooks/useAnalysisServices.js';
 import { useApiKey } from '../hooks/useApiKey.js';

@@ -1,28 +1,16 @@
-import { createContext, useContext, useMemo, useReducer, useRef, useEffect } from 'react';
+import { useMemo, useReducer, useRef, useEffect } from 'react';
 import { createLogger } from '../services/logger.js';
 import { FrameCaptureService } from '../services/frameCapture.js';
 import { GeminiClient } from '../services/geminiClient.js';
 import { createVideoLoader } from '../services/videoLoader.js';
 import { AnalysisManager } from '../services/analysisManager.js';
 import { createExporter } from '../services/exporter.js';
-import { ActionTypes, AnalysisStatus, AnalysisModes, appReducer, initialState } from './appReducer.js';
+import { appReducer, initialState } from './appReducer.js';
 
-const AppStateContext = createContext(initialState);
-const AppDispatchContext = createContext(() => {});
-const ServiceContext = createContext(null);
+import { AppStateContext, AppDispatchContext, ServiceContext } from './appContexts.js';
 
 export function AppStateProvider({ children }) {
-  const [state, dispatch] = useReducer(appReducer, initialState, (baseState) => {
-    const envKey = import.meta.env.VITE_GEMINI_API_KEY ?? '';
-    if (envKey) {
-      return {
-        ...baseState,
-        apiKey: envKey,
-        apiKeySource: 'env',
-      };
-    }
-    return baseState;
-  });
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -89,17 +77,3 @@ export function AppStateProvider({ children }) {
     </AppStateContext.Provider>
   );
 }
-
-export function useAppState() {
-  return useContext(AppStateContext);
-}
-
-export function useAppDispatch() {
-  return useContext(AppDispatchContext);
-}
-
-export function useServices() {
-  return useContext(ServiceContext);
-}
-
-export { ActionTypes, AnalysisStatus, AnalysisModes };

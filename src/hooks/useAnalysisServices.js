@@ -1,4 +1,4 @@
-import { useServices } from '../state/AppStateProvider.jsx';
+import { useServices } from '../state/appHooks.js';
 
 export function useAnalysisServices() {
   const services = useServices();

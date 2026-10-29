@@ -1,4 +1,4 @@
-import { useAppState, AnalysisStatus } from "../state/AppStateProvider.jsx";
+import { useAppState, AnalysisStatus } from "../state/appHooks.js";
 
 function NarrativePlaceholder({ analysisStatus }) {
   if (analysisStatus === AnalysisStatus.ANALYZING || analysisStatus === AnalysisStatus.CAPTURING) {

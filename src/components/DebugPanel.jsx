@@ -1,4 +1,4 @@
-import { useAppState } from "../state/AppStateProvider.jsx";
+import { useAppState } from "../state/appHooks.js";
 
 function levelStyles(level) {
   switch (level) {

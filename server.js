@@ -11,25 +11,21 @@ app.set('trust proxy', 1);
 
 // Configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const ACCESS_KEYWORD = process.env.ACCESS_KEYWORD || 'demo123';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'change-this-secret-in-production';
+const ACCESS_KEYWORD = process.env.ACCESS_KEYWORD;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 const SESSION_TIMEOUT_MINUTES = 30;
 
-// Validate required environment variables
-if (!GEMINI_API_KEY) {
-    console.error('ERROR: GEMINI_API_KEY environment variable is required!');
-    process.exit(1);
+// Refuse known examples and missing credentials; never fall back to shared defaults.
+const placeholders = /^(demo123|change-this.*|your_.*)$/i;
+if ([GEMINI_API_KEY, ACCESS_KEYWORD, SESSION_SECRET].some(
+    value => !value || !value.trim() || placeholders.test(value.trim())
+) || SESSION_SECRET.length < 32) {
+    throw new Error('Configure GEMINI_API_KEY, ACCESS_KEYWORD and a random SESSION_SECRET of at least 32 characters');
 }
 
 // Helper functions
 function verifyKeyword(keyword) {
     return keyword === ACCESS_KEYWORD;
-}
-
-function isGeminiApiKey(input) {
-    const trimmed = input.trim();
-    // Gemini API keys start with "AIzaSy" and are 39 characters long
-    return trimmed.startsWith('AIzaSy') && trimmed.length === 39;
 }
 
 // Middleware
@@ -39,7 +35,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: true, // Changed to true to ensure session is created
+    saveUninitialized: false,
     cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production', // HTTPS only in production
@@ -59,37 +55,12 @@ if (process.env.NODE_ENV === 'production') {
 app.post('/api/auth/validate', (req, res) => {
     const { keyword } = req.body;
 
-    if (!keyword) {
+    if (typeof keyword !== 'string' || !keyword.trim()) {
         return res.status(400).json({
             success: false,
             error: 'input_required',
             message: 'Access keyword or API key is required'
         });
-    }
-
-    // Check if input is a Gemini API key
-    if (isGeminiApiKey(keyword)) {
-        console.log('[AUTH] Gemini API key detected - client-side mode');
-        // Mark session as using own API key
-        req.session.authType = 'api_key';
-        req.session.authenticated = true;
-        // Explicitly save session to ensure cookie is sent
-        req.session.save((err) => {
-            if (err) {
-                console.error('[AUTH] Session save error:', err);
-                return res.status(500).json({
-                    success: false,
-                    error: 'session_error',
-                    message: 'Failed to create session'
-                });
-            }
-            return res.json({
-                success: true,
-                auth_type: 'api_key',
-                message: 'Using your own API key'
-            });
-        });
-        return;
     }
 
     // Otherwise, treat as keyword for backend proxy
@@ -105,19 +76,19 @@ app.post('/api/auth/validate', (req, res) => {
     // Keyword auth - create session
     req.session.authType = 'keyword';
     req.session.authenticated = true;
-    console.log(`[AUTH] Keyword auth successful - session ID: ${req.sessionID}`);
+    console.log('[AUTH] Keyword auth successful');
 
     // Explicitly save session to ensure cookie is sent
     req.session.save((err) => {
         if (err) {
-            console.error('[AUTH] Session save error:', err);
+            console.error('[AUTH] Session save error');
             return res.status(500).json({
                 success: false,
                 error: 'session_error',
                 message: 'Failed to create session'
             });
         }
-        console.log(`[AUTH] Session saved successfully - ID: ${req.sessionID}`);
+        console.log('[AUTH] Session saved');
         res.json({
             success: true,
             auth_type: 'keyword',
@@ -130,16 +101,8 @@ app.post('/api/auth/validate', (req, res) => {
 app.post('/api/analyze', async (req, res) => {
     const { image_data, perspective_prompt } = req.body;
 
-    // Debug session state
-    console.log(`[ANALYZE] Session ID: ${req.sessionID}, Authenticated: ${req.session.authenticated}, AuthType: ${req.session.authType}`);
-
     // Check if authenticated via session
     if (!req.session.authenticated || req.session.authType !== 'keyword') {
-        console.log(`[ANALYZE] Auth check failed - Session data:`, {
-            sessionID: req.sessionID,
-            authenticated: req.session.authenticated,
-            authType: req.session.authType
-        });
         return res.status(401).json({
             success: false,
             error: 'not_authenticated',
@@ -159,11 +122,13 @@ app.post('/api/analyze', async (req, res) => {
     try {
         // Call Gemini API (using Gemini 2.5 Flash - best for vision in 2025)
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
             {
                 method: 'POST',
+                signal: AbortSignal.timeout(60000),
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-goog-api-key': GEMINI_API_KEY,
                 },
                 body: JSON.stringify({
                     contents: [{
@@ -182,8 +147,7 @@ app.post('/api/analyze', async (req, res) => {
         );
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[GEMINI] API error: ${response.status} - ${errorText}`);
+            console.error(`[GEMINI] API error: ${response.status}`);
             return res.status(response.status).json({
                 success: false,
                 error: 'gemini_api_error',
@@ -203,12 +167,12 @@ app.post('/api/analyze', async (req, res) => {
             throw new Error('Unexpected API response format');
         }
 
-    } catch (error) {
-        console.error(`[GEMINI] Request failed:`, error);
+    } catch {
+        console.error('[GEMINI] Request failed');
         res.status(500).json({
             success: false,
             error: 'server_error',
-            message: `Analysis failed: ${error.message}`
+            message: 'Analysis failed. Check server configuration, quota and connection.'
         });
     }
 });
@@ -238,11 +202,13 @@ app.post('/api/generate-summary', async (req, res) => {
     try {
         // Call Gemini API for text generation
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
             {
                 method: 'POST',
+                signal: AbortSignal.timeout(60000),
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-goog-api-key': GEMINI_API_KEY,
                 },
                 body: JSON.stringify({
                     contents: [{
@@ -256,8 +222,7 @@ app.post('/api/generate-summary', async (req, res) => {
         );
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`[GEMINI] API error: ${response.status} - ${errorText}`);
+            console.error(`[GEMINI] API error: ${response.status}`);
             return res.status(response.status).json({
                 success: false,
                 error: 'gemini_api_error',
@@ -277,12 +242,12 @@ app.post('/api/generate-summary', async (req, res) => {
             throw new Error('Unexpected API response format');
         }
 
-    } catch (error) {
-        console.error(`[GEMINI] Request failed:`, error);
+    } catch {
+        console.error('[GEMINI] Request failed');
         res.status(500).json({
             success: false,
             error: 'server_error',
-            message: `Summary generation failed: ${error.message}`
+            message: 'Summary generation failed. Check server configuration, quota and connection.'
         });
     }
 });
@@ -306,15 +271,17 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Error handler
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
+app.use((err, req, res, _next) => {
+    console.error('Request failed');
     res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
+if (require.main === module) app.listen(PORT, () => {
     console.log(`Video Analyzer server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Session timeout: ${SESSION_TIMEOUT_MINUTES} minutes`);
     console.log(`Access keyword configured: ${ACCESS_KEYWORD ? 'Yes' : 'No'}`);
     console.log(`Using express-session with HTTP-only cookies`);
 });
+
+module.exports = app;

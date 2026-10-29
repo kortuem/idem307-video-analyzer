@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useApiKey } from '../hooks/useApiKey.js';
-import { useAnalysisServices } from '../hooks/useAnalysisServices.js';
 
 function maskKey(key) {
   if (!key) return '';
@@ -14,7 +13,7 @@ function isGeminiApiKey(input) {
 }
 
 export default function ApiKeyBanner() {
-  const { apiKey, apiKeySource, hasConfiguredKey, setApiKey, clearApiKey } = useApiKey();
+  const { apiKey, hasConfiguredKey, setApiKey, clearApiKey } = useApiKey();
   const [tempKey, setTempKey] = useState('');
   const [status, setStatus] = useState('');
   const [isValidating, setIsValidating] = useState(false);
@@ -25,6 +24,14 @@ export default function ApiKeyBanner() {
 
     if (!input) {
       setStatus('Please enter an access keyword or API key.');
+      return;
+    }
+
+    // Personal keys go directly to Google, never to the instructor server.
+    if (isGeminiApiKey(input)) {
+      setApiKey(input, 'manual');
+      setTempKey('');
+      setStatus('Personal API key set; Google will validate it on the first request.');
       return;
     }
 
@@ -58,8 +65,8 @@ export default function ApiKeyBanner() {
       }
 
       setTempKey('');
-    } catch (error) {
-      setStatus(`Error: ${error.message}`);
+    } catch {
+      setStatus('Unable to validate access. Check the server and connection.');
     } finally {
       setIsValidating(false);
     }
@@ -78,7 +85,7 @@ export default function ApiKeyBanner() {
             Access Key or API Key
             {hasConfiguredKey && (
               <span className="ml-2 rounded-full bg-sky-800 px-2 py-0.5 text-xs font-medium text-sky-100">
-                {apiKeySource === 'env' ? 'Loaded from environment' : 'Validated'}
+                Key set
               </span>
             )}
           </p>
@@ -111,7 +118,7 @@ export default function ApiKeyBanner() {
               type="button"
               onClick={handleClear}
               className="rounded-lg border border-slate-500 px-3 py-2 text-sm font-medium text-slate-100 hover:border-slate-400"
-              disabled={!hasConfiguredKey || apiKeySource === 'env'}
+              disabled={!hasConfiguredKey}
             >
               Clear
             </button>

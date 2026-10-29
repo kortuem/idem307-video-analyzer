@@ -1,3 +1,5 @@
+> Historical teaching guide. For current setup, privacy and deployment limits, read [README.md](README.md). Claims about built-in rate or capacity limits are not implemented by this prototype.
+
 # Video Analyzer Tutorial
 
 **Developed by**: Prof. Gerd Kortuem with Claude Code
